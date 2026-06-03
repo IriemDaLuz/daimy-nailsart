@@ -1285,6 +1285,150 @@ details > summary::-webkit-details-marker { display: none; }
 }
 
 /* =========================================
+   OFERTA
+   ========================================= */
+.oferta {
+  padding: var(--sp-8) 0;
+}
+
+.oferta__card {
+  border-radius: var(--radius-xl);
+  padding: clamp(var(--sp-8), 4vw, var(--sp-12)) clamp(var(--sp-8), 5vw, var(--sp-16));
+  position: relative;
+  overflow: hidden;
+  transition: opacity 0.4s ease;
+}
+
+/* Estado activo — oferta real */
+.oferta__card--active {
+  background: linear-gradient(135deg, #2A2520 0%, #3D2A2A 50%, #2A2520 100%);
+  color: var(--c-white);
+  box-shadow: 0 16px 48px rgba(42,37,32,.18);
+}
+
+.oferta__card--active::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 60% 80% at 10% 50%, rgba(232,180,192,.15) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 60% at 90% 20%, rgba(201,169,110,.12) 0%, transparent 55%);
+  pointer-events: none;
+}
+
+.oferta__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  font-size: var(--fs-xs);
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--c-gold);
+  background: rgba(201,169,110,.15);
+  border: 1px solid rgba(201,169,110,.3);
+  border-radius: var(--radius-full);
+  padding: 0.3em 0.9em;
+  margin-bottom: var(--sp-4);
+}
+
+.oferta__title {
+  font-family: var(--ff-title);
+  font-size: clamp(1.6rem, 4vw, 2.6rem);
+  font-weight: 400;
+  line-height: 1.15;
+  color: var(--c-white);
+  margin-bottom: var(--sp-4);
+  position: relative;
+}
+
+.oferta__body {
+  font-size: var(--fs-md);
+  color: rgba(255,255,255,.78);
+  line-height: 1.85;
+  max-width: 640px;
+  margin-bottom: var(--sp-8);
+  white-space: pre-line;
+  position: relative;
+}
+
+.oferta__meta {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-6);
+  flex-wrap: wrap;
+  position: relative;
+}
+
+.oferta__cta {
+  background: var(--c-gold);
+  color: var(--c-white);
+  border-radius: var(--radius-full);
+  padding: 0.8rem 1.8rem;
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  transition: background var(--transition), transform var(--transition), box-shadow var(--transition);
+  text-decoration: none;
+}
+
+.oferta__cta:hover {
+  background: #B8953A;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(201,169,110,.4);
+}
+
+.oferta__expires {
+  font-size: var(--fs-xs);
+  color: rgba(255,255,255,.5);
+  letter-spacing: 0.04em;
+}
+
+.oferta__deco {
+  position: absolute;
+  right: clamp(var(--sp-6), 6vw, var(--sp-16));
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: clamp(3rem, 8vw, 7rem);
+  opacity: .08;
+  pointer-events: none;
+  user-select: none;
+  line-height: 1;
+}
+
+/* Estado inactivo — texto genérico */
+.oferta__card--inactive {
+  background: var(--c-surface);
+  border: 1.5px dashed var(--c-border);
+  text-align: center;
+  padding: var(--sp-10) var(--sp-8);
+}
+
+.oferta__coming-kicker {
+  font-size: var(--fs-xs);
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--c-gold);
+  margin-bottom: var(--sp-3);
+}
+
+.oferta__coming-title {
+  font-family: var(--ff-title);
+  font-size: var(--fs-xl);
+  font-style: italic;
+  color: var(--c-text-mid);
+  margin-bottom: var(--sp-3);
+}
+
+.oferta__coming-text {
+  font-size: var(--fs-sm);
+  color: var(--c-text-lt);
+}
+
+/* =========================================
    PLACEHOLDERS para imágenes faltantes
    ========================================= */
 .galeria__item .galeria__img-wrap img[src=""],

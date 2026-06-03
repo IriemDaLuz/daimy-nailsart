@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin · Daimy Nail's Art</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:       #F5F2EE;
+      --surface:  #FFFFFF;
+      --border:   #E2D9D0;
+      --text:     #2A2520;
+      --mid:      #6B5F57;
+      --lt:       #A09288;
+      --gold:     #C9A96E;
+      --gold-lt:  #E8D5B0;
+      --rose:     #D4899A;
+      --wa:       #25D366;
+      --danger:   #E05454;
+      --radius:   12px;
+      --shadow:   0 4px 20px rgba(42,37,32,.08);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'DM Sans', system-ui, sans-serif; font-size: 0.9375rem; color: var(--text); background: var(--bg); min-height: 100svh; }
+    a { color: inherit; text-decoration: none; }
+    button { cursor: pointer; border: none; font: inherit; }
+    textarea, input, select { font: inherit; }
+
+    /* ---- Layout ---- */
+    .admin-wrap { display: grid; grid-template-columns: 260px 1fr; min-height: 100svh; }
+    @media (max-width: 768px) { .admin-wrap { grid-template-columns: 1fr; } }
+
+    /* ---- Sidebar ---- */
+    .sidebar {
+      background: var(--text);
+      color: rgba(255,255,255,.75);
+      padding: 2rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+      position: sticky;
+      top: 0;
+      height: 100svh;
+      overflow-y: auto;
+    }
+    @media (max-width: 768px) { .sidebar { position: static; height: auto; } }
+    .sidebar__logo { font-family: 'Cormorant Garamond', serif; font-size: 1.25rem; color: #fff; letter-spacing: .02em; }
+    .sidebar__sub { font-size: .75rem; color: rgba(255,255,255,.35); letter-spacing: .1em; text-transform: uppercase; margin-top: .25rem; }
+    .sidebar__sep { height: 1px; background: rgba(255,255,255,.1); }
+    .sidebar__nav { display: flex; flex-direction: column; gap: .5rem; }
+    .sidebar__link {
+      display: flex; align-items: center; gap: .625rem;
+      padding: .6rem .875rem; border-radius: 8px;
+      font-size: .875rem; color: rgba(255,255,255,.6);
+      transition: background .2s, color .2s;
+    }
+    .sidebar__link:hover, .sidebar__link.is-active {
+      background: rgba(255,255,255,.08); color: #fff;
+    }
+    .sidebar__link svg { flex-shrink: 0; opacity: .7; }
+    .sidebar__bottom { margin-top: auto; }
+    .sidebar__view-btn {
+      display: flex; align-items: center; gap: .5rem;
+      width: 100%; padding: .7rem 1rem; border-radius: 8px;
+      background: rgba(255,255,255,.06); color: rgba(255,255,255,.65);
+      font-size: .8125rem; transition: background .2s, color .2s;
+    }
+    .sidebar__view-btn:hover { background: rgba(255,255,255,.12); color: #fff; }
+
+    /* ---- Main ---- */
+    .admin-main { padding: 2.5rem clamp(1.5rem, 4vw, 3rem); max-width: 860px; }
+
+    /* ---- Gate ---- */
+    #loginGate {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      min-height: 100svh; padding: 2rem;
+      background: var(--bg);
+    }
+    .gate-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 20px; padding: 3rem 2.5rem;
+      width: min(420px, 100%); box-shadow: var(--shadow);
+      text-align: center;
+    }
+    .gate-card h1 { font-family: 'Cormorant Garamond', serif; font-size: 1.75rem; font-weight: 400; margin-bottom: .5rem; }
+    .gate-card p { font-size: .875rem; color: var(--mid); margin-bottom: 2rem; }
+    .gate-error { font-size: .8125rem; color: var(--danger); margin-top: .75rem; display: none; }
+    .gate-error.show { display: block; }
+
+    /* ---- Section header ---- */
+    .section-head { margin-bottom: 1.75rem; }
+    .section-head h2 { font-family: 'Cormorant Garamond', serif; font-size: 1.75rem; font-weight: 400; }
+    .section-head p { font-size: .875rem; color: var(--mid); margin-top: .25rem; }
+
+    /* ---- Toggle card ---- */
+    .toggle-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 1.25rem 1.5rem;
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 1rem; margin-bottom: 1.5rem;
+      box-shadow: var(--shadow);
+    }
+    .toggle-label { font-weight: 500; font-size: .9375rem; }
+    .toggle-label small { display: block; font-weight: 400; font-size: .8125rem; color: var(--mid); margin-top: .15rem; }
+    .toggle-switch { position: relative; width: 48px; height: 26px; flex-shrink: 0; }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; position: absolute; }
+    .toggle-track {
+      position: absolute; inset: 0; border-radius: 9999px;
+      background: var(--border); transition: background .25s; cursor: pointer;
+    }
+    .toggle-track::after {
+      content: ''; position: absolute;
+      width: 20px; height: 20px; border-radius: 50%;
+      background: #fff; top: 3px; left: 3px;
+      transition: transform .25s; box-shadow: 0 1px 3px rgba(0,0,0,.2);
+    }
+    .toggle-switch input:checked + .toggle-track { background: var(--gold); }
+    .toggle-switch input:checked + .toggle-track::after { transform: translateX(22px); }
+    .toggle-switch input:focus-visible + .toggle-track { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+    /* ---- Status pill ---- */
+    .status-pill {
+      display: inline-flex; align-items: center; gap: .4rem;
+      padding: .25em .8em; border-radius: 9999px;
+      font-size: .75rem; font-weight: 500; letter-spacing: .04em;
+    }
+    .status-pill--on { background: rgba(37,211,102,.12); color: #18a84a; }
+    .status-pill--off { background: rgba(160,146,136,.12); color: var(--lt); }
+    .status-pill::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+
+    /* ---- Form ---- */
+    .form-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 1.75rem;
+      box-shadow: var(--shadow); margin-bottom: 1.5rem;
+    }
+    .form-card h3 { font-size: .8125rem; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; color: var(--lt); margin-bottom: 1.25rem; }
+    .field-group { display: flex; flex-direction: column; gap: 1.125rem; }
+    .field { display: flex; flex-direction: column; gap: .4rem; }
+    .field label { font-size: .8125rem; font-weight: 500; color: var(--mid); }
+    .field input, .field textarea, .field select {
+      border: 1.5px solid var(--border); border-radius: 8px;
+      padding: .65rem .875rem; font-size: .9375rem; color: var(--text);
+      background: var(--bg); width: 100%;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .field input:focus, .field textarea:focus, .field select:focus {
+      outline: none; border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(201,169,110,.15);
+    }
+    .field textarea { resize: vertical; min-height: 130px; line-height: 1.7; }
+    .field-hint { font-size: .75rem; color: var(--lt); margin-top: .25rem; }
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    @media (max-width: 520px) { .field-row { grid-template-columns: 1fr; } }
+
+    /* ---- Buttons ---- */
+    .btn {
+      display: inline-flex; align-items: center; gap: .5rem;
+      padding: .7rem 1.6rem; border-radius: 9999px;
+      font-size: .875rem; font-weight: 500; cursor: pointer;
+      transition: background .2s, transform .2s, box-shadow .2s;
+    }
+    .btn--primary { background: var(--text); color: #fff; }
+    .btn--primary:hover { background: #3D3530; transform: translateY(-1px); }
+    .btn--ghost { background: transparent; color: var(--mid); border: 1.5px solid var(--border); }
+    .btn--ghost:hover { border-color: var(--text); color: var(--text); }
+    .btn--danger { background: var(--danger); color: #fff; }
+    .btn--danger:hover { background: #c94343; }
+    .btn-row { display: flex; gap: .75rem; flex-wrap: wrap; margin-top: 1.5rem; }
+    .save-ok { font-size: .8125rem; color: #18a84a; display: none; align-items: center; gap: .4rem; }
+    .save-ok.show { display: flex; }
+
+    /* ---- Preview ---- */
+    .preview-wrap { margin-top: 2rem; }
+    .preview-label { font-size: .75rem; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; color: var(--lt); margin-bottom: .75rem; }
+    .preview-frame {
+      border-radius: var(--radius); overflow: hidden;
+      border: 1.5px solid var(--border);
+    }
+    .preview-inner { padding: 2rem; }
+
+    /* ---- Preview: active ---- */
+    .preview-active {
+      background: linear-gradient(135deg, #2A2520 0%, #3D2A2A 50%, #2A2520 100%);
+      position: relative; overflow: hidden;
+    }
+    .preview-active::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 60% 80% at 10% 50%, rgba(232,180,192,.15) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    .preview-active .p-badge {
+      display: inline-flex; align-items: center; gap: .35rem;
+      font-size: .72rem; font-weight: 500; letter-spacing: .12em; text-transform: uppercase;
+      color: #C9A96E; background: rgba(201,169,110,.15); border: 1px solid rgba(201,169,110,.3);
+      border-radius: 9999px; padding: .25em .8em; margin-bottom: .875rem;
+    }
+    .preview-active .p-title { font-family: 'Cormorant Garamond', serif; font-size: clamp(1.3rem,3vw,2rem); font-weight: 400; color: #fff; margin-bottom: .5rem; line-height: 1.2; position: relative; }
+    .preview-active .p-body { font-size: .875rem; color: rgba(255,255,255,.75); line-height: 1.8; white-space: pre-line; margin-bottom: 1.25rem; position: relative; }
+    .preview-active .p-cta {
+      display: inline-flex; align-items: center; gap: .5rem;
+      background: #C9A96E; color: #fff;
+      padding: .6rem 1.4rem; border-radius: 9999px;
+      font-size: .8125rem; font-weight: 500;
+    }
+    .preview-active .p-expires { font-size: .75rem; color: rgba(255,255,255,.45); margin-left: .875rem; }
+    .preview-active .p-deco { position: absolute; right: 1.5rem; top: 50%; transform: translateY(-50%); font-size: 5rem; opacity: .07; pointer-events: none; }
+
+    /* ---- Preview: inactive ---- */
+    .preview-inactive {
+      background: #F4F0EB;
+      border: 1.5px dashed #E2D9D0;
+      text-align: center; padding: 2.5rem 2rem;
+    }
+    .preview-inactive .p-kicker { font-size: .72rem; font-weight: 500; letter-spacing: .14em; text-transform: uppercase; color: #C9A96E; margin-bottom: .5rem; }
+    .preview-inactive .p-coming { font-family: 'Cormorant Garamond', serif; font-size: 1.25rem; font-style: italic; color: #6B5F57; margin-bottom: .375rem; }
+    .preview-inactive .p-hint { font-size: .8125rem; color: #A09288; }
+
+    /* ---- Char counter ---- */
+    .char-count { font-size: .72rem; color: var(--lt); text-align: right; margin-top: .2rem; }
+
+    /* ---- Last offer display ---- */
+    .last-offer-card {
+      background: rgba(201,169,110,.06); border: 1px solid var(--gold-lt);
+      border-radius: var(--radius); padding: 1.25rem 1.5rem;
+      margin-bottom: 1.5rem; display: none;
+    }
+    .last-offer-card.show { display: block; }
+    .last-offer-card h4 { font-size: .75rem; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; color: var(--gold); margin-bottom: .5rem; }
+    .last-offer-card p { font-size: .875rem; color: var(--mid); line-height: 1.7; white-space: pre-line; }
+
+    /* ---- Danger zone ---- */
+    .danger-zone { background: rgba(224,84,84,.04); border: 1px solid rgba(224,84,84,.2); border-radius: var(--radius); padding: 1.25rem 1.5rem; }
+    .danger-zone h4 { font-size: .8125rem; font-weight: 500; color: var(--danger); margin-bottom: .375rem; }
+    .danger-zone p { font-size: .8125rem; color: var(--mid); margin-bottom: 1rem; }
+
+    /* ---- Logout ---- */
+    .logout-btn { font-size: .8125rem; color: rgba(255,255,255,.4); background: none; padding: .5rem 0; transition: color .2s; }
+    .logout-btn:hover { color: rgba(255,255,255,.75); }
+  </style>
+</head>
+<body>
+
+<!-- ===== GATE DE CONTRASEÑA ===== -->
+<div id="loginGate">
+  <div class="gate-card">
+    <h1>Daimy Nail's Art</h1>
+    <p>Panel de administración · Introduce tu contraseña para continuar</p>
+    <div class="field">
+      <label for="pwdInput">Contraseña</label>
+      <input type="password" id="pwdInput" placeholder="••••••••" autocomplete="current-password" />
+    </div>
+    <p class="gate-error" id="gateError">Contraseña incorrecta. Inténtalo de nuevo.</p>
+    <div class="btn-row" style="justify-content:center;margin-top:1.5rem">
+      <button class="btn btn--primary" id="loginBtn">Entrar al panel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PANEL ADMIN ===== -->
+<div id="adminPanel" style="display:none">
+  <div class="admin-wrap">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div>
+        <div class="sidebar__logo">Daimy Nail's Art</div>
+        <div class="sidebar__sub">Admin Panel</div>
+      </div>
+      <div class="sidebar__sep"></div>
+      <nav class="sidebar__nav" aria-label="Navegación del panel">
+        <a href="#" class="sidebar__link is-active" data-section="oferta">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7 7h.01M3 3h7l10 10-7 7L3 13V3z"/></svg>
+          Gestionar oferta
+        </a>
+      </nav>
+      <div class="sidebar__sep"></div>
+      <div class="sidebar__bottom">
+        <a href="index.html" target="_blank" class="sidebar__view-btn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          Ver web
+        </a>
+        <button class="logout-btn" id="logoutBtn" style="margin-top:.75rem;display:flex;align-items:center;gap:.5rem">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          Cerrar sesión
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="admin-main">
+
+      <div class="section-head">
+        <h2>Gestionar oferta</h2>
+        <p>Activa o desactiva la sección de promoción de la web y personaliza su contenido.</p>
+      </div>
+
+      <!-- Toggle activo/inactivo -->
+      <div class="toggle-card">
+        <div>
+          <div class="toggle-label">
+            Estado de la oferta
+            <small id="statusText">Cargando…</small>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:1rem">
+          <span class="status-pill status-pill--off" id="statusPill">Inactiva</span>
+          <label class="toggle-switch" aria-label="Activar oferta">
+            <input type="checkbox" id="offerToggle" />
+            <span class="toggle-track"></span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Última oferta guardada (visible cuando está inactiva) -->
+      <div class="last-offer-card" id="lastOfferCard">
+        <h4>Última oferta guardada</h4>
+        <p id="lastOfferText">—</p>
+      </div>
+
+      <!-- Formulario de oferta -->
+      <div class="form-card" id="formCard">
+        <h3>Contenido de la oferta</h3>
+        <div class="field-group">
+
+          <div class="field">
+            <label for="offerTitle">Título de la oferta</label>
+            <input type="text" id="offerTitle" placeholder="ej. ¡SOLO HOY!! El taller INCLUYE KIT 🔥" maxlength="100" />
+            <div class="char-count" id="titleCount">0 / 100</div>
+          </div>
+
+          <div class="field">
+            <label for="offerBody">Texto / descripción</label>
+            <textarea id="offerBody" placeholder="ej. ⭕ APARTA con $400 y liquida en cómodos pagos 🔥🔥🔥&#10;Tengo solo un lugar con este beneficio 🔥&#10;&#10;¡Queremos que seas parte de esta comunidad!" maxlength="500"></textarea>
+            <div class="char-count" id="bodyCount">0 / 500</div>
+          </div>
+
+          <div class="field-row">
+            <div class="field">
+              <label for="offerWa">Enlace de WhatsApp</label>
+              <input type="url" id="offerWa" placeholder="https://wa.me/34XXXXXXXXX" />
+              <span class="field-hint">Incluye el mensaje si quieres</span>
+            </div>
+            <div class="field">
+              <label for="offerCta">Texto del botón</label>
+              <input type="text" id="offerCta" placeholder="Más información" maxlength="40" />
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="offerExpires">Caducidad (opcional)</label>
+            <input type="text" id="offerExpires" placeholder="ej. Válido solo hoy · 2 jun" maxlength="50" />
+            <span class="field-hint">Aparece junto al botón como recordatorio de urgencia</span>
+          </div>
+
+        </div>
+
+        <div class="btn-row">
+          <button class="btn btn--primary" id="saveBtn">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+            Guardar y publicar
+          </button>
+          <span class="save-ok" id="saveOk">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            ¡Guardado!
+          </span>
+        </div>
+      </div>
+
+      <!-- Preview -->
+      <div class="preview-wrap">
+        <div class="preview-label">Vista previa en tiempo real</div>
+        <div class="preview-frame">
+          <div id="previewInner"></div>
+        </div>
+      </div>
+
+      <!-- Zona de peligro -->
+      <div class="danger-zone" style="margin-top:2rem">
+        <h4>Zona de peligro</h4>
+        <p>Borra todos los datos de la oferta y deja la sección en estado "próximamente".</p>
+        <button class="btn btn--danger" id="clearBtn">Borrar oferta guardada</button>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<script>
+  // -------- Contraseña --------
+  const PASS = "daimy2024"; // ← cambia esto para mayor seguridad
+
+  const loginGate   = document.getElementById("loginGate");
+  const adminPanel  = document.getElementById("adminPanel");
+  const pwdInput    = document.getElementById("pwdInput");
+  const loginBtn    = document.getElementById("loginBtn");
+  const gateError   = document.getElementById("gateError");
+  const logoutBtn   = document.getElementById("logoutBtn");
+
+  function checkSession() {
+    if (sessionStorage.getItem("daimy_admin") === "ok") {
+      loginGate.style.display  = "none";
+      adminPanel.style.display = "";
+      loadData();
+    }
+  }
+
+  loginBtn.addEventListener("click", doLogin);
+  pwdInput.addEventListener("keydown", e => { if (e.key === "Enter") doLogin(); });
+
+  function doLogin() {
+    if (pwdInput.value === PASS) {
+      sessionStorage.setItem("daimy_admin", "ok");
+      loginGate.style.display  = "none";
+      adminPanel.style.display = "";
+      loadData();
+    } else {
+      gateError.classList.add("show");
+      pwdInput.value = "";
+      pwdInput.focus();
+    }
+  }
+
+  logoutBtn.addEventListener("click", () => {
+    sessionStorage.removeItem("daimy_admin");
+    location.reload();
+  });
+
+  // -------- Datos --------
+  const KEYS = {
+    active:  "daimy_offer_active",
+    title:   "daimy_offer_title",
+    body:    "daimy_offer_body",
+    wa:      "daimy_offer_wa",
+    cta:     "daimy_offer_cta",
+    expires: "daimy_offer_expires",
+  };
+
+  const toggle   = document.getElementById("offerToggle");
+  const titleIn  = document.getElementById("offerTitle");
+  const bodyIn   = document.getElementById("offerBody");
+  const waIn     = document.getElementById("offerWa");
+  const ctaIn    = document.getElementById("offerCta");
+  const expIn    = document.getElementById("offerExpires");
+  const saveBtn  = document.getElementById("saveBtn");
+  const saveOk   = document.getElementById("saveOk");
+  const clearBtn = document.getElementById("clearBtn");
+  const statusPill = document.getElementById("statusPill");
+  const statusText = document.getElementById("statusText");
+  const lastCard   = document.getElementById("lastOfferCard");
+  const lastText   = document.getElementById("lastOfferText");
+  const titleCount = document.getElementById("titleCount");
+  const bodyCount  = document.getElementById("bodyCount");
+
+  function loadData() {
+    const active = localStorage.getItem(KEYS.active) === "true";
+    toggle.checked = active;
+    titleIn.value  = localStorage.getItem(KEYS.title)   || "";
+    bodyIn.value   = localStorage.getItem(KEYS.body)    || "";
+    waIn.value     = localStorage.getItem(KEYS.wa)      || "";
+    ctaIn.value    = localStorage.getItem(KEYS.cta)     || "";
+    expIn.value    = localStorage.getItem(KEYS.expires) || "";
+    updateStatus(active);
+    updateCounts();
+    updatePreview();
+    updateLastOffer();
+  }
+
+  function updateStatus(active) {
+    statusPill.className = "status-pill " + (active ? "status-pill--on" : "status-pill--off");
+    statusPill.textContent = active ? "Activa" : "Inactiva";
+    statusText.textContent = active
+      ? "La oferta está visible en la web ahora mismo"
+      : "La web muestra el mensaje de próximamente";
+  }
+
+  function updateLastOffer() {
+    const t = localStorage.getItem(KEYS.title) || "";
+    const b = localStorage.getItem(KEYS.body)  || "";
+    const isActive = localStorage.getItem(KEYS.active) === "true";
+    if (!isActive && (t || b)) {
+      lastCard.classList.add("show");
+      lastText.textContent = [t, b].filter(Boolean).join("\n");
+    } else {
+      lastCard.classList.remove("show");
+    }
+  }
+
+  function updateCounts() {
+    titleCount.textContent = `${titleIn.value.length} / 100`;
+    bodyCount.textContent  = `${bodyIn.value.length} / 500`;
+  }
+
+  function escHtml(s) {
+    return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+  }
+
+  function updatePreview() {
+    const active  = toggle.checked;
+    const title   = titleIn.value.trim();
+    const body    = bodyIn.value.trim();
+    const wa      = waIn.value.trim();
+    const cta     = ctaIn.value.trim() || "Más información";
+    const expires = expIn.value.trim();
+    const preview = document.getElementById("previewInner");
+
+    if (active && (title || body)) {
+      preview.className = "preview-inner preview-active";
+      preview.innerHTML = `
+        <div class="p-badge">✦ Promoción especial</div>
+        <div class="p-title">${escHtml(title) || "Título de la oferta"}</div>
+        <div class="p-body">${escHtml(body).replace(/\n/g,"<br>") || "Descripción de la oferta…"}</div>
+        <div style="display:flex;align-items:center;gap:.875rem;flex-wrap:wrap;position:relative">
+          ${wa ? `<a href="${escHtml(wa)}" class="p-cta" target="_blank">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+            ${escHtml(cta)}
+          </a>` : `<span class="p-cta">${escHtml(cta)}</span>`}
+          ${expires ? `<span class="p-expires">⏳ ${escHtml(expires)}</span>` : ""}
+        </div>
+        <div class="p-deco">✦</div>
+      `;
+    } else {
+      preview.className = "preview-inactive";
+      preview.innerHTML = `
+        <div class="p-kicker">Próximamente</div>
+        <div class="p-coming">Estamos preparando algo especial para ti…</div>
+        <div class="p-hint">Síguenos en Instagram para ser la primera en enterarte.</div>
+      `;
+    }
+  }
+
+  // -------- Eventos --------
+  toggle.addEventListener("change", () => {
+    updateStatus(toggle.checked);
+    updatePreview();
+  });
+
+  [titleIn, bodyIn, waIn, ctaIn, expIn].forEach(el => {
+    el.addEventListener("input", () => { updateCounts(); updatePreview(); });
+  });
+
+  saveBtn.addEventListener("click", () => {
+    localStorage.setItem(KEYS.active,  toggle.checked ? "true" : "false");
+    localStorage.setItem(KEYS.title,   titleIn.value.trim());
+    localStorage.setItem(KEYS.body,    bodyIn.value.trim());
+    localStorage.setItem(KEYS.wa,      waIn.value.trim());
+    localStorage.setItem(KEYS.cta,     ctaIn.value.trim());
+    localStorage.setItem(KEYS.expires, expIn.value.trim());
+
+    saveOk.classList.add("show");
+    setTimeout(() => saveOk.classList.remove("show"), 3000);
+    updateLastOffer();
+  });
+
+  clearBtn.addEventListener("click", () => {
+    if (!confirm("¿Borrar todos los datos de la oferta?")) return;
+    Object.values(KEYS).forEach(k => localStorage.removeItem(k));
+    toggle.checked = false;
+    titleIn.value = bodyIn.value = waIn.value = ctaIn.value = expIn.value = "";
+    updateStatus(false);
+    updateCounts();
+    updatePreview();
+    updateLastOffer();
+  });
+
+  // -------- Init --------
+  checkSession();
+  pwdInput.focus();
+</script>
+</body>
+</html>
